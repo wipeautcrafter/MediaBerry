@@ -142,6 +142,7 @@
           Radio
         </div>
         <select class="station">
+          <option value="">None</option>
           <option value="http://198.15.94.34:8006/1">Deep House Lounge</option>
           <option value="https://deephouseradio.radioca.st/deep">Deep House Radio</option>
         </select>
@@ -188,13 +189,13 @@
       slider.value = json.volume;
       percentage.innerHTML = json.volume + "%";
 
-      document.querySelectorAll(".on").filter(b => b.value === json.active)[0].classList.add("active");
+      Array.from(document.querySelectorAll(".on")).filter(b => b.value === json.current)[0].classList.add("active");
     });
 
     function GET(url, callback) {
         const xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function() {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200 && callback)
                 callback(xmlHttp.responseText);
         }
         xmlHttp.open("GET", url, true);
