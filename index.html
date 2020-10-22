@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>MediaBerry</title>
+
+    <style>
+      :root {
+        --primary: #593870;
+        --secondary: #7c7c7c;
+        --dark: #161616;
+        --light: #f7f7f7;
+      }
+
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+      body {
+        font-family: 'Open Sans', sans-serif;
+        color: var(--light);
+        background: var(--dark);
+      }
+
+      body {
+        display: flex;
+        height: 100vh;
+        align-items: center;
+
+        padding: 0em 1em;
+
+        margin: 0;
+        padding: 0;
+      }
+
+      .panel {
+        display: flex;
+        flex: 1 1 auto;
+      }
+
+      .volume {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+
+        align-items: center;
+
+        background: var(--primary);
+
+        height: 100%;
+        width: 3rem;
+
+        color: var(--secondary);
+
+        text-align: center;
+      }
+      .volume input {
+        -webkit-appearance: none;
+        appearance: none;
+
+        width: 2rem;
+        height: 100%;
+
+        margin: 0.5em 0em;
+        border-radius: 8px;
+
+        background: rgba(0, 0, 0, 0.3);
+
+        flex: 1 1 auto;
+
+
+      }
+
+      .volume input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 2rem;
+        height: 1rem;
+        background: var(--primary);
+        border: none;
+      }
+
+      .volume input::-moz-range-thumb {
+        width: 2rem;
+        height: 1rem;
+        background: var(--primary);
+        border: none;
+      }
+
+      .volume-percentage {
+        font-weight: bold;
+        color: var(--light);
+      }
+
+      .option {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        padding: 2rem;
+
+        text-align: center;
+      }
+
+      .title {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .station {
+        margin-top: 1em;
+      }
+
+      .divider {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+
+        color: var(--secondary);
+      }
+
+      .on {
+        background: var(--secondary);
+        border-radius: 5px;
+        border: none;
+        font-size: 1em;
+      }
+      .on.active {
+        background: var(--primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="volume">
+      <input type="range" min="0" max="100" orient="vertical">
+      <div class="volume-percentage">100%</div>
+    </div>
+    <div class="panel">
+      <div class="option">
+        <div class="title">
+          <button class="on" value="radio">📻</button>
+          Radio
+        </div>
+        <select class="station">
+          <option value="http://198.15.94.34:8006/1">Deep House Lounge</option>
+          <option value="https://deephouseradio.radioca.st/deep">Deep House Radio</option>
+        </select>
+      </div>
+      <div class="divider">or</div>
+      <div class="option">
+        <div class="title">
+          <button class="on" value="spotify">📡</button>
+          Connect
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script type="text/javascript">
+    const slider = document.querySelector(".volume input");
+    const percentage = document.querySelector(".volume-percentage");
+    const buttons = document.querySelectorAll(".on");
+    const station = document.querySelector(".station");
+
+    slider.oninput = function() {
+      percentage.innerHTML = slider.value + "%";
+    };
+
+    slider.onchange = function() {
+      GET("/volume?" + slider.value);
+    };
+
+    buttons.forEach(button => {
+      button.onclick = function() {
+        document.querySelector(".active").classList.remove("active");
+        button.classList.add("active");
+        if(button.value === "radio") {
+          GET(`/radio?${encodeURIComponent(station.value)}`);
+        } else if(button.value === "spotify") {
+          GET("/spotify");
+        }
+      };
+    });
+
+    GET("/status", function(res) {
+      const json = JSON.parse(res);
+
+      slider.value = json.volume;
+      percentage.innerHTML = json.volume + "%";
+
+      document.querySelectorAll(".on").filter(b => b.value === json.active)[0].classList.add("active");
+    });
+
+    function GET(url, callback) {
+        const xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        }
+        xmlHttp.open("GET", url, true);
+        xmlHttp.send(null);
+    }
+  </script>
+</html>
